@@ -22,6 +22,9 @@ import {
   ClipboardList,
   UserCog,
 } from "lucide-react";
+import { useNavigate, useLocation } from "react-router-dom";
+import { logoutUser } from "../../firebase";
+import { useToast } from "@/components/ui/use-toast";
 
 interface SidebarProps {
   collapsed?: boolean;
@@ -29,61 +32,83 @@ interface SidebarProps {
 }
 
 const Sidebar = ({ collapsed = false, onToggle = () => {} }: SidebarProps) => {
+  const navigate = useNavigate();
+  const location = useLocation();
+  const { toast } = useToast();
+
   const navItems = [
     {
       title: "Dasbor",
       icon: <LayoutDashboard className="h-5 w-5" />,
       href: "/",
-      active: true,
     },
     {
       title: "Peta Interaktif",
       icon: <Map className="h-5 w-5" />,
       href: "/map",
-      active: false,
     },
     {
       title: "Analitik",
       icon: <BarChart3 className="h-5 w-5" />,
       href: "/analytics",
-      active: false,
     },
     {
       title: "Sistem Pelaporan",
       icon: <FileText className="h-5 w-5" />,
       href: "/reports",
-      active: false,
     },
     {
       title: "Bank Sampah",
       icon: <Recycle className="h-5 w-5" />,
       href: "/bank",
-      active: false,
     },
     {
       title: "Master Sampah",
       icon: <Trash2 className="h-5 w-5" />,
       href: "/master",
-      active: false,
     },
     {
       title: "Status Sampah",
       icon: <ClipboardList className="h-5 w-5" />,
       href: "/status",
-      active: false,
     },
     {
       title: "Preferensi Pengguna",
       icon: <UserCog className="h-5 w-5" />,
       href: "/preferences",
-      active: false,
+    },
+    {
+      title: "Pengaturan",
+      icon: <Settings className="h-5 w-5" />,
+      href: "/settings",
     },
   ];
+
+  const handleLogout = async () => {
+    try {
+      await logoutUser();
+      toast({
+        title: "Berhasil keluar",
+        description: "Anda telah berhasil keluar dari sistem",
+      });
+      navigate("/login");
+    } catch (error: any) {
+      toast({
+        variant: "destructive",
+        title: "Gagal keluar",
+        description: error.message || "Terjadi kesalahan saat keluar",
+      });
+    }
+  };
+
+  const isActive = (href: string) => {
+    return location.pathname === href;
+  };
 
   return (
     <div
       className={cn(
-        "flex h-full flex-col border-r bg-background transition-all duration-300 z-50",
+        "flex h-full flex-col border-r bg-white transition-all duration-300 z-50",
         collapsed ? "w-16" : "w-[280px]",
       )}
     >
@@ -123,24 +148,22 @@ const Sidebar = ({ collapsed = false, onToggle = () => {} }: SidebarProps) => {
               <Tooltip>
                 <TooltipTrigger asChild>
                   <Button
-                    variant={item.active ? "secondary" : "ghost"}
+                    variant={isActive(item.href) ? "secondary" : "ghost"}
                     className={cn(
                       "flex h-10 justify-start",
                       collapsed ? "w-10 px-0" : "w-full px-3",
                     )}
-                    asChild
+                    onClick={() => navigate(item.href)}
                   >
-                    <a href={item.href}>
-                      <span
-                        className={cn(
-                          "flex items-center",
-                          collapsed ? "justify-center" : "justify-start gap-3",
-                        )}
-                      >
-                        {item.icon}
-                        {!collapsed && <span>{item.title}</span>}
-                      </span>
-                    </a>
+                    <span
+                      className={cn(
+                        "flex items-center",
+                        collapsed ? "justify-center" : "justify-start gap-3",
+                      )}
+                    >
+                      {item.icon}
+                      {!collapsed && <span>{item.title}</span>}
+                    </span>
                   </Button>
                 </TooltipTrigger>
                 {collapsed && (
@@ -162,6 +185,7 @@ const Sidebar = ({ collapsed = false, onToggle = () => {} }: SidebarProps) => {
                   "flex h-10 justify-start text-red-500 hover:bg-red-50 hover:text-red-600",
                   collapsed ? "w-10 px-0" : "w-full px-3",
                 )}
+                onClick={handleLogout}
               >
                 <span
                   className={cn(

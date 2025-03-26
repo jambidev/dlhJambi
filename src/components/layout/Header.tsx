@@ -23,6 +23,9 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
+import { useNavigate } from "react-router-dom";
+import { logoutUser } from "../../firebase";
+import { useToast } from "@/components/ui/use-toast";
 
 interface HeaderProps {
   title?: string;
@@ -45,10 +48,29 @@ const Header = ({
 }: HeaderProps) => {
   const [searchQuery, setSearchQuery] = useState("");
   const [notificationCount, setNotificationCount] = useState(3);
+  const navigate = useNavigate();
+  const { toast } = useToast();
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
     onSearch(searchQuery);
+  };
+
+  const handleLogout = async () => {
+    try {
+      await logoutUser();
+      toast({
+        title: "Berhasil keluar",
+        description: "Anda telah berhasil keluar dari sistem",
+      });
+      navigate("/login");
+    } catch (error: any) {
+      toast({
+        variant: "destructive",
+        title: "Gagal keluar",
+        description: error.message || "Terjadi kesalahan saat keluar",
+      });
+    }
   };
 
   return (
@@ -116,16 +138,16 @@ const Header = ({
               </div>
             </div>
             <DropdownMenuSeparator className="md:hidden" />
-            <DropdownMenuItem>
+            <DropdownMenuItem onClick={() => navigate("/profile")}>
               <User className="mr-2 h-4 w-4" />
               <span>Profil</span>
             </DropdownMenuItem>
-            <DropdownMenuItem>
+            <DropdownMenuItem onClick={() => navigate("/settings")}>
               <Settings className="mr-2 h-4 w-4" />
               <span>Pengaturan</span>
             </DropdownMenuItem>
             <DropdownMenuSeparator />
-            <DropdownMenuItem>
+            <DropdownMenuItem onClick={handleLogout}>
               <LogOut className="mr-2 h-4 w-4" />
               <span>Keluar</span>
             </DropdownMenuItem>

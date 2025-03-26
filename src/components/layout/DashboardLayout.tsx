@@ -3,6 +3,7 @@ import Sidebar from "./Sidebar";
 import Header from "./Header";
 import { Menu } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { useNavigate, useLocation } from "react-router-dom";
 
 interface DashboardLayoutProps {
   children?: React.ReactNode;
@@ -15,6 +16,8 @@ const DashboardLayout = ({
 }: DashboardLayoutProps) => {
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const navigate = useNavigate();
+  const location = useLocation();
 
   const toggleSidebar = () => {
     setSidebarCollapsed(!sidebarCollapsed);
@@ -22,6 +25,15 @@ const DashboardLayout = ({
 
   const toggleMobileMenu = () => {
     setMobileMenuOpen(!mobileMenuOpen);
+  };
+
+  const handleNavClick = (path: string) => {
+    navigate(path);
+    setMobileMenuOpen(false);
+  };
+
+  const isActive = (path: string) => {
+    return location.pathname === path;
   };
 
   return (
@@ -63,9 +75,21 @@ const DashboardLayout = ({
           {/* Secondary Navigation Bar */}
           <div className="bg-white border-b px-4 py-2 overflow-x-auto">
             <div className="flex space-x-1 md:space-x-4 min-w-max">
-              <NavButton label="Bank Sampah" active={true} />
-              <NavButton label="Master Sampah" />
-              <NavButton label="Status Sampah" />
+              <NavButton
+                label="Bank Sampah"
+                active={isActive("/bank")}
+                onClick={() => handleNavClick("/bank")}
+              />
+              <NavButton
+                label="Master Sampah"
+                active={isActive("/master")}
+                onClick={() => handleNavClick("/master")}
+              />
+              <NavButton
+                label="Status Sampah"
+                active={isActive("/status")}
+                onClick={() => handleNavClick("/status")}
+              />
             </div>
           </div>
 
@@ -78,6 +102,9 @@ const DashboardLayout = ({
               © 2023 Siritase - Dinas Lingkungan Hidup Kota Jambi. Hak Cipta
               Dilindungi.
             </p>
+            <p className="mt-1">
+              Dikembangkan oleh Mardianto Eka Saputra | WA: 082275552225
+            </p>
           </footer>
         </div>
       </div>
@@ -88,11 +115,14 @@ const DashboardLayout = ({
 const NavButton = ({
   label,
   active = false,
+  onClick,
 }: {
   label: string;
   active?: boolean;
+  onClick?: () => void;
 }) => (
   <button
+    onClick={onClick}
     className={`px-3 py-2 text-sm font-medium rounded-md transition-colors ${
       active
         ? "bg-green-100 text-green-800"

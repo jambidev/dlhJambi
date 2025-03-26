@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "../ui/card";
 import {
   BarChart3,
@@ -9,12 +9,28 @@ import {
   Download,
 } from "lucide-react";
 import { Button } from "../ui/button";
+import { Popover, PopoverContent, PopoverTrigger } from "../ui/popover";
+import { Calendar as CalendarComponent } from "../ui/calendar";
+import { format } from "date-fns";
+import { id } from "date-fns/locale";
 
 interface AnalyticsPreviewProps {
   className?: string;
 }
 
 const AnalyticsPreview = ({ className }: AnalyticsPreviewProps) => {
+  const [date, setDate] = useState<Date | undefined>(new Date());
+  const [isDownloading, setIsDownloading] = useState(false);
+
+  const handleDownload = () => {
+    setIsDownloading(true);
+    // Simulate download process
+    setTimeout(() => {
+      setIsDownloading(false);
+      alert("Laporan berhasil diunduh!");
+    }, 1500);
+  };
+
   return (
     <Card className={`w-full h-full bg-white ${className}`}>
       <CardHeader className="pb-2 flex flex-row items-center justify-between">
@@ -23,13 +39,36 @@ const AnalyticsPreview = ({ className }: AnalyticsPreviewProps) => {
           Ikhtisar Analitik
         </CardTitle>
         <div className="flex space-x-2">
-          <Button variant="outline" size="sm" className="h-8 px-2">
-            <Calendar className="h-4 w-4 mr-1" />
-            <span className="text-xs">Periode</span>
-          </Button>
-          <Button variant="outline" size="sm" className="h-8 px-2">
+          <Popover>
+            <PopoverTrigger asChild>
+              <Button variant="outline" size="sm" className="h-8 px-2">
+                <Calendar className="h-4 w-4 mr-1" />
+                <span className="text-xs">
+                  {date ? format(date, "MMM yyyy", { locale: id }) : "Periode"}
+                </span>
+              </Button>
+            </PopoverTrigger>
+            <PopoverContent className="w-auto p-0" align="end">
+              <CalendarComponent
+                mode="single"
+                selected={date}
+                onSelect={setDate}
+                initialFocus
+              />
+            </PopoverContent>
+          </Popover>
+
+          <Button
+            variant="outline"
+            size="sm"
+            className="h-8 px-2"
+            onClick={handleDownload}
+            disabled={isDownloading}
+          >
             <Download className="h-4 w-4 mr-1" />
-            <span className="text-xs">Unduh</span>
+            <span className="text-xs">
+              {isDownloading ? "Mengunduh..." : "Unduh"}
+            </span>
           </Button>
         </div>
       </CardHeader>
